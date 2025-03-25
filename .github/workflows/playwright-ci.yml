@@ -28,7 +28,8 @@ jobs:
         run: |
           if (Test-Path .env) {
             Get-Content .env | ForEach-Object {
-            $env:($_ -split '=' -replace '^"|"$')[0] = ($_ -split '=' -replace '^"|"$')[1]
+            $parts = $_ -split '=' -replace '^"|"$'
+            ${env:$parts[0]} = $parts[1]
             }
           }
         shell: pwsh
