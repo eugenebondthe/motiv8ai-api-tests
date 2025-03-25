@@ -2,6 +2,7 @@ import test, { APIRequestContext, APIResponse } from '@playwright/test'
 import { APIRoutes } from '../../utils/constants/routes'
 import { APIClient } from '../../utils/types/api/client'
 import { Post, UpdatePost } from '../../utils/types/api/posts'
+import { expectStatusCode } from '../../utils/assertions/solutions'
 
 export class PostsAPIClient implements APIClient {
   constructor(public context: APIRequestContext) {}
@@ -24,10 +25,7 @@ export class PostsAPIClient implements APIClient {
     })
   }
 
-  async updatePostAPI(
-    postId: number,
-    data: UpdatePost,
-  ): Promise<APIResponse> {
+  async updatePostAPI(postId: number, data: UpdatePost): Promise<APIResponse> {
     return await test.step(`Updating question with id "${postId}"`, async () => {
       return await this.context.patch(`${APIRoutes.Posts}/${postId}`, {
         data,

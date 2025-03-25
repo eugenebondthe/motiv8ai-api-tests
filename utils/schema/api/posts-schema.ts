@@ -23,7 +23,7 @@ export const updatePostSchema: JSONSchemaType<UpdatePost> = {
   },
 }
 
-export const postsSchema: JSONSchemaType<Post[]> = {
+export const postsListSchema: JSONSchemaType<Post[]> = {
   title: 'PostsList',
   type: 'array',
   items: {
