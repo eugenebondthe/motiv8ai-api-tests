@@ -1,0 +1,66 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: Posts >> Create post
+- Location: C:\Users\eugen\Documents\Study\motiv8ai-api-tests\tests\api\posts.spec.ts:44:7
+
+# Error details
+
+```
+Error: expect(received).toEqual(expected) // deep equality
+
+Expected: 101
+Received: 69
+    at C:\Users\eugen\Documents\Study\motiv8ai-api-tests\utils\assertions\solutions.ts:20:20
+    at expectToEqual (C:\Users\eugen\Documents\Study\motiv8ai-api-tests\utils\assertions\solutions.ts:19:15)
+    at assertPost (C:\Users\eugen\Documents\Study\motiv8ai-api-tests\utils\assertions\api\posts.ts:39:22)
+    at C:\Users\eugen\Documents\Study\motiv8ai-api-tests\tests\api\posts.spec.ts:55:21
+```
+
+# Test source
+
+```ts
+   1 | import { expect, test } from '@playwright/test'
+   2 |
+   3 | type ExpectToEqual<T> = {
+   4 |   actual: T
+   5 |   expected: T
+   6 |   description: string
+   7 | }
+   8 |
+   9 | type ExpectStatusCode = { api: string } & Omit<
+  10 |   ExpectToEqual<number>,
+  11 |   'description'
+  12 | >
+  13 |
+  14 | export const expectToEqual = async <T>({
+  15 |   actual,
+  16 |   expected,
+  17 |   description,
+  18 | }: ExpectToEqual<T>) => {
+  19 |   return test.step(`Checking that "${description}" is equal to "${expected}"`, async () => {
+> 20 |     expect(actual).toEqual(expected)
+     |                    ^ Error: expect(received).toEqual(expected) // deep equality
+  21 |   })
+  22 | }
+  23 |
+  24 | export const expectStatusCode = async ({
+  25 |   actual,
+  26 |   expected,
+  27 |   api,
+  28 | }: ExpectStatusCode): Promise<void> => {
+  29 |   return test.step(`Checking that response status code for API "${api}" equal to ${expected}`, async () => {
+  30 |     expectToEqual({
+  31 |       actual,
+  32 |       expected,
+  33 |       description: 'Response Status code',
+  34 |     })
+  35 |   })
+  36 | }
+  37 |
+```
