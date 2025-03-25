@@ -1,85 +1,91 @@
-// import { test, expect } from '@playwright/test'
-// import { apiClient } from '../utils/apiClient'
-// import { validatePost } from '../utils/responseValidator'
-// import testData from '../fixtures/testData'
+import {
+  getRandomPost,
+  getRandomUpdatePost,
+} from '../../utils/data/fakeDataGenerator'
+import { assertPost, assertUpdatePost } from '../../utils/assertions/api/posts'
+import { expectStatusCode } from '../../utils/assertions/solutions'
+import { validateSchema } from '../../utils/schema/responseValidator'
+import {
+  postSchema,
+  updatePostSchema,
+  postsListSchema,
+} from '../../utils/schema/api/posts-schema'
+import { Post } from '../../utils/types/api/posts'
+import { postsTest as test } from '../posts-test'
 
-// test.describe('Posts API', () => {
-//   test('GET /posts returns a list', async () => {
-//     const response = await apiClient.get('/posts')
-//     expect(response.status()).toBe(200)
-//     const posts = await response.json()
-//     expect(posts.length).toBeGreaterThan(0)
-//     validatePost(posts[0])
-//   })
+test.describe('Posts', () => {
+  test('Get post', async ({ post, postsClient }) => {
+    const response = await postsClient.getPostAPI(post.id)
+    const json: Post = await response.json()
 
-//   test('GET /posts/:id returns a post', async () => {
-//     const response = await apiClient.get('/posts/1')
-//     expect(response.status()).toBe(200)
-//     validatePost(await response.json())
-//   })
-
-//   test('POST /posts creates a new post', async () => {
-//     const response = await apiClient.post('/posts', testData.newPost)
-//     expect(response.status()).toBe(201)
-//     const post = await response.json()
-//     expect(post).toHaveProperty('id')
-//   })
-
-//   test('POST /posts without title should return 400', async () => {
-//     const response = await apiClient.post('/posts', { body: 'Missing title' })
-//     expect(response.status()).toBe(400)
-//   })
-
-//   test('DELETE /posts/:id twice should return 404', async () => {
-//     await apiClient.delete('/posts/1')
-//     const response = await apiClient.delete('/posts/1')
-//     expect(response.status()).toBe(404)
-//   })
-// })
-
-import { test, expect } from '@playwright/test'
-import { apiClient } from '../../utils/apiClient'
-import { config } from '../../config/env'
-import { validatePost } from '../../utils/schema/responseValidator'
-import { generatePost } from '../../utils/data/fakeDataGenerator'
-
-test.describe('Posts API', () => {
-  test.describe('GET /posts', () => {
-    test('should return list of posts', async () => {
-      const response = await apiClient.get('/posts')
-      validatePost(response)
-      const body = await response.json()
-      
-      expect(body).toBeGreaterThan(0)
+    await expectStatusCode({
+      actual: response.status(),
+      expected: 200,
+      api: response.url(),
     })
+    await assertPost({ expectedPost: post, actualPost: json })
 
-    test('should return post by ID', async () => {
-      const response = await apiClient.get('/posts/1')
-      const body = await response.json()
-      
-      expect(body).toHaveProperty('id', 1)
-    })
+    await validateSchema({ schema: postSchema, json })
   })
 
-  test.describe('POST /posts', () => {
-    test('should create a new post', async () => {
-        const newPost = generatePost()
-        const response = await apiClient.post('/posts', newPost)
-        const body = await response.json()
+  test('Get posts', async ({ postsClient }) => {
+    const response = await postsClient.getPostsAPI()
+    const json: Post[] = await response.json()
 
-        expect(response.status()).toBe(201)
-        expect(body).toHaveProperty('id')
+    await expectStatusCode({
+      actual: response.status(),
+      expected: 200,
+      api: response.url(),
     })
+
+    await validateSchema({ schema: postsListSchema, json })
   })
 
-  test.describe('PUT /posts', () => {
-    test('should update an existing post', async () => {
-        const updatedPost = generatePost()
-        const response = await apiClient.put('/posts/1', updatedPost)
-        const body = await response.json()
-        
-        expect(response.status()).toBe(200)
-        expect(body.title).toBe(updatedPost.title)
+  test('Create post', async ({ postsClient }) => {
+    const payload = getRandomPost()
+
+    const response = await postsClient.createPostAPI(payload)
+    const json: Post = await response.json()
+
+    await expectStatusCode({
+      actual: response.status(),
+      expected: 201,
+      api: response.url(),
+    })
+    await assertPost({ expectedPost: payload, actualPost: json })
+
+    await validateSchema({ schema: postSchema, json })
+  })
+
+  test('Update post', async ({ post, postsClient }) => {
+    const payload = getRandomUpdatePost()
+
+    const response = await postsClient.updatePostAPI(post.id, payload)
+    const json: Post = await response.json()
+
+    await expectStatusCode({
+      actual: response.status(),
+      expected: 200,
+      api: response.url(),
+    })
+    await assertUpdatePost({ expectedPost: payload, actualPost: json })
+
+    await validateSchema({ schema: updatePostSchema, json })
+  })
+
+  test('Delete post', async ({ post, postsClient }) => {
+    const deletePostResponse = await postsClient.deletePostAPI(post.id)
+    const getPostResponse = await postsClient.getPostAPI(post.id)
+
+    await expectStatusCode({
+      actual: getPostResponse.status(),
+      expected: 404,
+      api: getPostResponse.url(),
+    })
+    await expectStatusCode({
+      actual: deletePostResponse.status(),
+      expected: 200,
+      api: deletePostResponse.url(),
     })
   })
 })
