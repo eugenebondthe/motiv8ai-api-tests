@@ -16,8 +16,8 @@ export const expectToEqual = async <T>({
   expected,
   description,
 }: ExpectToEqual<T>) => {
-  await test.step(`Checking that "${actual}" is equal to "${expected}"`, async () => {
-    ;(expect as any)(actual).toEqual(expected)
+  await test.step(`Checking that "${description}" is equal to "${expected}"`, async () => {
+    expect(actual).toBe(expected)
   })
 }
 

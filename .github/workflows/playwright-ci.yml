@@ -26,16 +26,20 @@ jobs:
 
       - name: Load environment variables from .env
         run: |
-          if [ -f .env ]; then
-            export $(cat .env | xargs);
-          fi
+          if (Test-Path .env) {
+            Get-Content .env | ForEach-Object {
+            $parts = $_ -split '=' -replace '^"|"$'
+            $parts[0] = $parts[1]
+            }
+          }
+        shell: pwsh
 
       - name: Run Playwright tests
         run: npm test
 
       - name: Upload Test Results to Allure
         if: success()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: allure-results
           path: allure-results/

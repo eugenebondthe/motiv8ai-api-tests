@@ -50,6 +50,5 @@ node_modules/
 
 
 # Allure-Report
-allure-results/
 allure-report/
 allure-temp/

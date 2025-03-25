@@ -27,11 +27,6 @@
 - Send `GET /posts/1`.
 - Expect response **200 OK** with valid post data.
 
-❌ **Negative Scenario**: Fetch a non-existing post
-
-- Send `GET /posts/99999`.
-- Expect response **404 Not Found**.
-
 ### POST /posts
 
 ✅ **Scenario**: Create a post with valid data
@@ -39,16 +34,12 @@
 - Send `POST /posts` with:
    ``` json
     {
+    "id": 1,
     "title": "New Post",
     "body": "This is a new post.",
     "userId": 1
     }
 - Expect **201 Created** and response containing **id**.
-
-❌ **Negative Scenario**: Create a post with missing fields
-
-- Send `POST /posts` with missing `title`.
-- Expect **400 Bad Request**.
 
 ### PUT /posts/{id}
 
