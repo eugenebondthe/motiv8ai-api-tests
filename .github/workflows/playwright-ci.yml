@@ -26,9 +26,12 @@ jobs:
 
       - name: Load environment variables from .env
         run: |
-          if [ -f .env ]; then
-            export $(cat .env | xargs);
-          fi
+          if (Test-Path .env) {
+            Get-Content .env | ForEach-Object {
+            $env:($_ -split '=' -replace '^"|"$')[0] = ($_ -split '=' -replace '^"|"$')[1]
+            }
+          }
+        shell: pwsh
 
       - name: Run Playwright tests
         run: npm test
